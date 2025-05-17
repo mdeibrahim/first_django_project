@@ -17,9 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from tasks.views import admin_dashboard, user_dashboard
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin-dashboard/', admin_dashboard, name='admin_dashboard'),
     path('user-dashboard/', user_dashboard, name='user_dashboard')
-]
+]+ debug_toolbar_urls()
