@@ -6,17 +6,28 @@ from django.db.models import Q,Count,Max, Min, Avg, Sum
 
 # Create your views here.
 def admin_dashboard(request):
-    tasks = Task.objects.select_related('details').all()
-    total_tasks = tasks.count()
-    completed_tasks = tasks.filter(status='COMPLETED').count()
-    pending_tasks = tasks.filter(status='PENDING').count()
-    in_progress_tasks = tasks.filter(status='IN_PROGRESS').count()
+    type = request.GET.get('type', 'all')
+    
+    counts = Task.objects.aggregate(
+        total_tasks = Count('id'),
+        completed_tasks = Count('id', filter=Q(status='COMPLETED')),
+        pending_tasks = Count('id', filter=Q(status='PENDING')),
+        in_progress_tasks = Count('id', filter=Q(status='IN_PROGRESS'))
+    )
+    base_query = Task.objects.select_related('details'). prefetch_related('assigned_to')
+
+    if type == 'completed':
+        tasks = base_query.filter(status='COMPLETED')
+    elif type == 'in_progress':
+        tasks = base_query.filter(status='IN_PROGRESS')
+    elif type == 'pending':
+        tasks = base_query.filter(status='PENDING')
+    else:
+        tasks = base_query.all()
+
     context = {
         'tasks': tasks,
-        'total_tasks': total_tasks,
-        'completed_tasks': completed_tasks,
-        'pending_tasks': pending_tasks,
-        'in_progress_tasks': in_progress_tasks
+        'counts': counts
     }
     return render(request, 'dashboard/admin-dashboard.html', context)
 
