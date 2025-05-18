@@ -6,7 +6,7 @@ from django.db.models import Q,Count,Max, Min, Avg, Sum
 
 # Create your views here.
 def admin_dashboard(request):
-    tasks = Task.objects.all()
+    tasks = Task.objects.select_related('details').all()
     total_tasks = tasks.count()
     completed_tasks = tasks.filter(status='COMPLETED').count()
     pending_tasks = tasks.filter(status='PENDING').count()
